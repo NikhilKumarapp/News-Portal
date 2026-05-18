@@ -2706,7 +2706,7 @@ export default function App() {
 
   const fetchMembers = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/team");
+      const res = await axios.get("https://news-portal-backend-d8q9.onrender.com/api/team");
       setMembers(res.data);
     } catch (err) { console.error(err); }
   };
@@ -2718,11 +2718,11 @@ export default function App() {
     e.preventDefault();
     try {
       if (editId) {
-        await axios.put(`http://localhost:5000/api/team/${editId}`, formData);
+        await axios.put(`https://news-portal-backend-d8q9.onrender.com/api/team/${editId}`, formData);
         showToast("Member updated successfully");
         setEditId(null);
       } else {
-        await axios.post("http://localhost:5000/api/team", formData);
+        await axios.post("https://news-portal-backend-d8q9.onrender.com/api/team", formData);
         showToast("Member added successfully");
       }
       setFormData({ name: "", designation: "", city: "", image: "" });
@@ -2732,7 +2732,7 @@ export default function App() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/team/${id}`);
+      await axios.delete(`https://news-portal-backend-d8q9.onrender.com/api/team/${id}`);
       fetchMembers();
       showToast("Member removed");
     } catch (err) { console.error(err); }
