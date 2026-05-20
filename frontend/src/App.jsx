@@ -2574,11 +2574,11 @@ const css = `
 
 /* ─── Social links data ───────────────────────────────────── */
 const SOCIALS = [
-  { cls: "fb", icon: <FaFacebookF />,  href: "https://www.facebook.com/profile.php?id=100089941361341", label: "Facebook"  },
-  { cls: "ig", icon: <FaInstagram />,  href: "https://www.instagram.com/jee_india_news?igsh=MWlnMXAzbWp6YjRj", label: "Instagram" },
-  { cls: "tw", icon: <FaTwitter />,    href: "https://x.com/Jee_indianews",                               label: "Twitter"   },
-  { cls: "yt", icon: <FaYoutube />,    href: "https://youtube.com/@jeeindianews?si=y-DdUblyaBgJPXha",    label: "YouTube"   },
-  { cls: "wa", icon: <FaWhatsapp />,   href: "https://chat.whatsapp.com/EmfVuYpXk749Y0NUKqVbSw",         label: "WhatsApp"  },
+  { cls: "fb", icon: <FaFacebookF />, href: "https://www.facebook.com/profile.php?id=100089941361341", label: "Facebook" },
+  { cls: "ig", icon: <FaInstagram />, href: "https://www.instagram.com/jee_india_news?igsh=MWlnMXAzbWp6YjRj", label: "Instagram" },
+  { cls: "tw", icon: <FaTwitter />, href: "https://x.com/Jee_indianews", label: "Twitter" },
+  { cls: "yt", icon: <FaYoutube />, href: "https://youtube.com/@jeeindianews?si=y-DdUblyaBgJPXha", label: "YouTube" },
+  { cls: "wa", icon: <FaWhatsapp />, href: "https://chat.whatsapp.com/EmfVuYpXk749Y0NUKqVbSw", label: "WhatsApp" },
 ];
 
 const LOGO_URL = "/logo.png"; // Put logo.png in your public/ folder
@@ -2591,6 +2591,11 @@ const TICKER_ITEMS = [
   "JEE India News — Breaking News 24x7",
   "सच दिखाना हमारा धर्म है",
 ];
+
+const token = localStorage.getItem("token");
+
+const isAdmin = !!token;
+
 
 /* ─────────────────────────────────────────────────────────────
    Toast
@@ -2634,65 +2639,72 @@ function Ticker() {
 ───────────────────────────────────────────────────────────── */
 function MemberCard({ member, index, onEdit, onDelete }) {
   return (
-    <motion.div
-      className="member-card"
-      initial={{ opacity: 0, y: 28 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.94 }}
-      transition={{ delay: index * 0.07, duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -6, transition: { duration: 0.2 } }}
-    >
-      {/* Banner */}
-      <div className="card-banner">
-        <div className="card-banner-pattern" />
-        <img src={LOGO_URL} alt="" className="card-banner-logo"
-          onError={(e) => { e.target.style.display = "none"; }} />
-      </div>
+      <motion.div 
+        className="member-card"
+        initial={{ opacity: 0, y: 28 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.94 }}
+        transition={{ delay: index * 0.07, duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+        whileHover={{ y: -6, transition: { duration: 0.2 } }}
+      >
+        {/* Banner */}
+        {isAdmin && (
+          <div className="card-banner">
+            <div className="card-banner-pattern" />
+            <img src={LOGO_URL} alt="" className="card-banner-logo"
+              onError={(e) => { e.target.style.display = "none"; }} />
+          </div>
+        )}
 
-      {/* Avatar */}
-      <div className="card-avatar-wrap">
-        <img
-          className="card-avatar"
-          src={member.image}
-          alt={member.name}
-          onError={(e) => {
-            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              member.name
-            )}&background=1a0508&color=e8192c&size=200&bold=true`;
-          }}
-        />
-      </div>
+        {/* Avatar */}
+        {isAdmin && (
+          <div className="card-avatar-wrap">
+            <img
+              className="card-avatar"
+              src={member.image}
+              alt={member.name}
+              onError={(e) => {
+                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  member.name
+                )}&background=1a0508&color=e8192c&size=200&bold=true`;
+              }}
+            />
+          </div>
+        )}
 
-      {/* Info */}
-      <div className="card-body">
-        <h2 className="card-name">{member.name}</h2>
-        <span className="card-role">{member.designation}</span>
-        <div className="card-city">
-          <FaMapMarkerAlt />
-          <span>{member.city}</span>
-        </div>
-        <div className="card-divider" />
-        <div className="card-actions">
-          <button className="btn-icon btn-edit" onClick={() => onEdit(member)}>
-            <FaEdit /> Edit
-          </button>
-          <button className="btn-icon btn-delete" onClick={() => onDelete(member._id)}>
-            <FaTrash /> Remove
-          </button>
-        </div>
-      </div>
-    </motion.div>
-  );
+        {/* Info */}
+        {
+          isAdmin && (
+            <div className="card-body">
+              <h2 className="card-name">{member.name}</h2>
+              <span className="card-role">{member.designation}</span>
+              <div className="card-city">
+                <FaMapMarkerAlt />
+                <span>{member.city}</span>
+              </div>
+              <div className="card-divider" />
+              <div className="card-actions">
+                <button className="btn-icon btn-edit" onClick={() => onEdit(member)}>
+                  <FaEdit /> Edit
+                </button>
+                <button className="btn-icon btn-delete" onClick={() => onDelete(member._id)}>
+                  <FaTrash /> Remove
+                </button>
+              </div>
+            </div>
+          )}
+      </motion.div>
+    );
 }
 
 /* ─────────────────────────────────────────────────────────────
    App
 ───────────────────────────────────────────────────────────── */
 export default function App() {
-  const [members,  setMembers]  = useState([]);
-  const [search,   setSearch]   = useState("");
-  const [editId,   setEditId]   = useState(null);
-  const [toast,    setToast]    = useState(null);
+  const [members, setMembers] = useState([]);
+  const [search, setSearch] = useState("");
+  const [editId, setEditId] = useState(null);
+  const [toast, setToast] = useState(null);
   const [formData, setFormData] = useState({
     name: "", designation: "", city: "", image: "",
   });
@@ -2715,27 +2727,92 @@ export default function App() {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
+
     try {
+
       if (editId) {
-        await axios.put(`https://news-portal-backend-d8q9.onrender.com/api/team/${editId}`, formData);
+
+        await axios.put(
+
+          `https://news-portal-backend-d8q9.onrender.com/api/team/${editId}`,
+
+          formData,
+
+          {
+            headers: {
+              Authorization: token
+            }
+          }
+        );
+
         showToast("Member updated successfully");
+
         setEditId(null);
+
       } else {
-        await axios.post("https://news-portal-backend-d8q9.onrender.com/api/team", formData);
+
+        await axios.post(
+
+          "https://news-portal-backend-d8q9.onrender.com/api/team",
+
+          formData,
+
+          {
+            headers: {
+              Authorization: token
+            }
+          }
+        );
+
         showToast("Member added successfully");
       }
-      setFormData({ name: "", designation: "", city: "", image: "" });
+
+      setFormData({
+
+        name: "",
+        designation: "",
+        city: "",
+        image: "",
+      });
+
       fetchMembers();
-    } catch (err) { console.error(err); }
+
+    } catch (err) {
+
+      console.error(err);
+
+      showToast("Unauthorized Access");
+    }
   };
 
+
   const handleDelete = async (id) => {
+
     try {
-      await axios.delete(`https://news-portal-backend-d8q9.onrender.com/api/team/${id}`);
+
+      await axios.delete(
+
+        `https://news-portal-backend-d8q9.onrender.com/api/team/${id}`,
+
+        {
+          headers: {
+            Authorization: token
+          }
+        }
+      );
+
       fetchMembers();
+
       showToast("Member removed");
-    } catch (err) { console.error(err); }
+
+    } catch (err) {
+
+      console.error(err);
+
+      showToast("Unauthorized Access");
+    }
   };
 
   const handleEdit = (member) => {
@@ -2824,7 +2901,7 @@ export default function App() {
         <main className="main">
 
           {/* ── Form ── */}
-          <motion.div
+          {isAdmin && (<motion.div
             className="form-card"
             initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
@@ -2847,10 +2924,10 @@ export default function App() {
             <form onSubmit={handleSubmit}>
               <div className="form-grid">
                 {[
-                  { name: "name",        label: "Full Name",         placeholder: "e.g. Aryan Sharma"    },
-                  { name: "designation", label: "Designation",       placeholder: "e.g. Senior Reporter"  },
-                  { name: "city",        label: "City",              placeholder: "e.g. Mumbai"           },
-                  { name: "image",       label: "Profile Image URL", placeholder: "https://…"             },
+                  { name: "name", label: "Full Name", placeholder: "e.g. Aryan Sharma" },
+                  { name: "designation", label: "Designation", placeholder: "e.g. Senior Reporter" },
+                  { name: "city", label: "City", placeholder: "e.g. Mumbai" },
+                  { name: "image", label: "Profile Image URL", placeholder: "https://…" },
                 ].map((field) => (
                   <div className="field-wrap" key={field.name}>
                     <label className="field-label">{field.label}</label>
@@ -2879,7 +2956,8 @@ export default function App() {
                 </div>
               </div>
             </form>
-          </motion.div>
+          </motion.div>)
+          }
 
           {/* ── Team Grid ── */}
           <div className="section-head">
