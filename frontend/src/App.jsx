@@ -2003,264 +2003,218 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  FaTrash,
-  FaEdit,
-  FaSearch,
-  FaPlus,
-  FaMapMarkerAlt,
-  FaTimes,
-  FaCheck,
-  FaFacebookF,
-  FaInstagram,
-  FaTwitter,
-  FaYoutube,
-  FaWhatsapp,
+  FaTrash, FaEdit, FaSearch, FaPlus, FaMapMarkerAlt,
+  FaTimes, FaCheck, FaFacebookF, FaInstagram, FaTwitter,
+  FaYoutube, FaWhatsapp, FaLock, FaUnlock, FaSignOutAlt,
 } from "react-icons/fa";
 
-/* ─────────────────────────────────────────────────────────────
-   CSS
-───────────────────────────────────────────────────────────── */
+/* ─── CSS (same as before + admin additions) ─── */
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --bg:        #080c14;
-    --surface:   #0d1524;
-    --glass:     rgba(255,255,255,0.04);
-    --border:    rgba(255,255,255,0.08);
-    --border-hi: rgba(255,255,255,0.18);
-    --gold:      #c9a96e;
-    --gold-lt:   #e8c98a;
-    --cyan:      #38bdf8;
-    --red:       #f43f5e;
-    --yellow:    #fbbf24;
-    --text:      #f1f5f9;
-    --muted:     #64748b;
-    --news-red:  #e8192c;
-    --news-blue: #1a6fc4;
+    --bg: #080c14; --surface: #0d1524; --glass: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08); --border-hi: rgba(255,255,255,0.18);
+    --gold: #c9a96e; --gold-lt: #e8c98a; --cyan: #38bdf8;
+    --red: #f43f5e; --yellow: #fbbf24; --text: #f1f5f9;
+    --muted: #64748b; --news-red: #e8192c; --news-blue: #1a6fc4;
   }
-
-  body {
-    background: var(--bg);
-    font-family: 'DM Sans', sans-serif;
-    color: var(--text);
-  }
-
-  /* ── Ambient background glow ── */
-  .root-bg {
-    min-height: 100vh;
-    position: relative;
-    overflow-x: hidden;
-  }
+  body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--text); }
+  .root-bg { min-height: 100vh; position: relative; overflow-x: hidden; }
   .root-bg::before {
-    content: '';
-    position: fixed; inset: 0; z-index: 0;
+    content: ''; position: fixed; inset: 0; z-index: 0;
     background:
-      radial-gradient(ellipse 80% 60% at 10% 0%,   rgba(232,25,44,0.06)  0%, transparent 60%),
-      radial-gradient(ellipse 60% 50% at 90% 100%, rgba(26,111,196,0.07) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 40% at 50% 50%,  rgba(201,169,110,0.03) 0%, transparent 70%);
+      radial-gradient(ellipse 80% 60% at 10% 0%, rgba(232,25,44,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 100%, rgba(26,111,196,0.07) 0%, transparent 60%);
     pointer-events: none;
   }
 
-  /* ══════════════════════ HEADER ══════════════════════ */
+  /* HEADER */
   .header {
     position: sticky; top: 0; z-index: 50;
-    background: rgba(8,12,20,0.94);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    background: rgba(8,12,20,0.94); backdrop-filter: blur(24px);
     border-bottom: 1px solid rgba(232,25,44,0.2);
     padding: 12px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
   }
-
-  /* ── Brand (logo + name) ── */
-  .header-brand {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    text-decoration: none;
-  }
-
+  .header-brand { display: flex; align-items: center; gap: 14px; text-decoration: none; }
   .header-logo {
-    height: 52px;
-    width: auto;
-    object-fit: contain;
-    filter: drop-shadow(0 2px 8px rgba(232,25,44,0.4));
-    flex-shrink: 0;
+    height: 52px; width: auto; object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(232,25,44,0.4)); flex-shrink: 0;
   }
-
-  .header-brand-text {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-  }
+  .header-brand-text { display: flex; flex-direction: column; gap: 1px; }
   .header-brand-text h1 {
     font-family: 'Playfair Display', serif;
     font-size: clamp(1.1rem, 2.5vw, 1.5rem);
-    font-weight: 900;
-    color: var(--text);
-    letter-spacing: -0.01em;
-    line-height: 1.1;
+    font-weight: 900; color: var(--text); letter-spacing: -0.01em; line-height: 1.1;
   }
   .header-brand-text h1 span.red  { color: var(--news-red); }
   .header-brand-text h1 span.blue { color: var(--news-blue); }
   .header-brand-text small {
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--muted);
+    font-size: 0.65rem; font-weight: 600; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted);
   }
-
-  /* ── Social links ── */
-  .header-socials {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .header-socials { display: flex; align-items: center; gap: 8px; }
   .social-btn {
-    width: 34px; height: 34px;
-    border-radius: 9px;
+    width: 34px; height: 34px; border-radius: 9px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.85rem;
-    border: 1px solid var(--border);
-    background: var(--glass);
-    color: var(--muted);
-    text-decoration: none;
-    transition: all 0.2s;
-    flex-shrink: 0;
+    font-size: 0.85rem; border: 1px solid var(--border);
+    background: var(--glass); color: var(--muted);
+    text-decoration: none; transition: all 0.2s; flex-shrink: 0;
   }
   .social-btn:hover { transform: translateY(-2px); }
-  .social-btn.fb:hover   { background: #1877f2; border-color: #1877f2; color: #fff; box-shadow: 0 4px 14px rgba(24,119,242,0.4); }
-  .social-btn.ig:hover   { background: linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); border-color: #e6683c; color: #fff; box-shadow: 0 4px 14px rgba(220,39,67,0.4); }
-  .social-btn.tw:hover   { background: #000; border-color: #555; color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,0.5); }
-  .social-btn.yt:hover   { background: #ff0000; border-color: #ff0000; color: #fff; box-shadow: 0 4px 14px rgba(255,0,0,0.4); }
-  .social-btn.wa:hover   { background: #25d366; border-color: #25d366; color: #fff; box-shadow: 0 4px 14px rgba(37,211,102,0.4); }
-
-  .social-divider {
-    width: 1px; height: 24px;
-    background: var(--border);
-    margin: 0 4px;
-  }
-
-  /* ── Member count badge ── */
+  .social-btn.fb:hover { background:#1877f2; border-color:#1877f2; color:#fff; }
+  .social-btn.ig:hover { background:linear-gradient(135deg,#f09433,#dc2743); border-color:#e6683c; color:#fff; }
+  .social-btn.tw:hover { background:#000; border-color:#555; color:#fff; }
+  .social-btn.yt:hover { background:#ff0000; border-color:#ff0000; color:#fff; }
+  .social-btn.wa:hover { background:#25d366; border-color:#25d366; color:#fff; }
+  .social-divider { width:1px; height:24px; background:var(--border); margin:0 4px; }
   .header-count {
-    background: var(--glass);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 5px 16px;
-    font-size: 0.76rem; font-weight: 700;
-    color: var(--gold);
-    letter-spacing: 0.06em;
-    white-space: nowrap;
+    background: var(--glass); border: 1px solid var(--border);
+    border-radius: 100px; padding: 5px 16px;
+    font-size: 0.76rem; font-weight: 700; color: var(--gold);
+    letter-spacing: 0.06em; white-space: nowrap;
   }
-
-  /* ── Search ── */
-  .search-wrap {
-    position: relative;
-    flex: 1; max-width: 300px; min-width: 160px;
-  }
+  .search-wrap { position: relative; flex: 1; max-width: 300px; min-width: 160px; }
   .search-icon {
     position: absolute; left: 14px; top: 50%;
-    transform: translateY(-50%);
-    color: var(--muted); font-size: 0.8rem;
-    pointer-events: none;
+    transform: translateY(-50%); color: var(--muted); font-size: 0.8rem; pointer-events: none;
   }
   .search-input {
-    width: 100%;
-    padding: 11px 14px 11px 38px;
-    background: var(--glass);
-    border: 1px solid var(--border);
-    border-radius: 11px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
-    outline: none;
+    width: 100%; padding: 11px 14px 11px 38px;
+    background: var(--glass); border: 1px solid var(--border); border-radius: 11px;
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
   .search-input::placeholder { color: var(--muted); }
-  .search-input:focus {
-    border-color: var(--news-red);
-    box-shadow: 0 0 0 3px rgba(232,25,44,0.1);
-  }
+  .search-input:focus { border-color: var(--news-red); box-shadow: 0 0 0 3px rgba(232,25,44,0.1); }
 
-  /* ══════════════════════ TICKER ══════════════════════ */
-  .ticker-wrap {
-    background: var(--news-red);
-    overflow: hidden;
-    height: 32px;
-    display: flex;
-    align-items: center;
+  /* ADMIN BUTTON */
+  .admin-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 16px; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    border: 1px solid; cursor: pointer; transition: all 0.2s;
+    white-space: nowrap;
   }
+  .admin-btn.locked {
+    background: rgba(201,169,110,0.08); border-color: rgba(201,169,110,0.3); color: var(--gold);
+  }
+  .admin-btn.locked:hover { background: rgba(201,169,110,0.15); border-color: rgba(201,169,110,0.5); }
+  .admin-btn.active {
+    background: rgba(232,25,44,0.12); border-color: rgba(232,25,44,0.4); color: #ff6b7a;
+  }
+  .admin-btn.active:hover { background: rgba(232,25,44,0.2); }
+
+  /* TICKER */
+  .ticker-wrap { background: var(--news-red); overflow: hidden; height: 32px; display: flex; align-items: center; }
   .ticker-label {
-    background: #a80f1e;
-    color: #fff;
-    font-size: 0.7rem;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    padding: 0 14px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-    flex-shrink: 0;
+    background: #a80f1e; color: #fff; font-size: 0.7rem; font-weight: 800;
+    letter-spacing: 0.12em; text-transform: uppercase; padding: 0 14px;
+    height: 100%; display: flex; align-items: center; white-space: nowrap; flex-shrink: 0;
   }
-  .ticker-track {
-    display: flex;
-    animation: ticker 28s linear infinite;
-    white-space: nowrap;
-  }
-  .ticker-track span {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: #fff;
-    padding: 0 32px;
-    letter-spacing: 0.03em;
-  }
-  .ticker-track span::before {
-    content: '●';
-    margin-right: 12px;
-    opacity: 0.7;
-    font-size: 0.5rem;
-    vertical-align: middle;
-  }
-  @keyframes ticker {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
+  .ticker-track { display: flex; animation: ticker 28s linear infinite; white-space: nowrap; }
+  .ticker-track span { font-size: 0.78rem; font-weight: 600; color: #fff; padding: 0 32px; letter-spacing: 0.03em; }
+  .ticker-track span::before { content:'●'; margin-right:12px; opacity:0.7; font-size:0.5rem; vertical-align:middle; }
+  @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
 
-  /* ══════════════════════ MAIN ══════════════════════ */
-  .main {
-    position: relative; z-index: 1;
-    max-width: 1200px; margin: 0 auto;
-    padding: 44px 40px 80px;
+  /* ADMIN LOGIN MODAL */
+  .admin-login-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(8,12,20,0.85); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center; padding: 16px;
   }
+  .admin-login-box {
+    background: var(--surface); border: 1px solid rgba(232,25,44,0.3);
+    border-radius: 22px; padding: 40px 36px; width: 100%; max-width: 400px;
+    position: relative;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+  }
+  .admin-login-box::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--news-red), var(--news-blue));
+    border-radius: 22px 22px 0 0;
+  }
+  .admin-lock-icon {
+    width: 56px; height: 56px; border-radius: 16px; margin: 0 auto 20px;
+    background: rgba(232,25,44,0.12); border: 1px solid rgba(232,25,44,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; color: var(--news-red);
+  }
+  .admin-login-box h2 {
+    font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700;
+    text-align: center; color: var(--text); margin-bottom: 6px;
+  }
+  .admin-login-box p { font-size: 0.8rem; color: var(--muted); text-align: center; margin-bottom: 28px; }
+  .admin-login-field { margin-bottom: 16px; }
+  .admin-login-label {
+    display: block; font-size: 0.68rem; font-weight: 700;
+    letter-spacing: 0.13em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 8px;
+  }
+  .admin-login-input {
+    width: 100%; padding: 13px 18px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-radius: 12px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 0.93rem; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .admin-login-input:focus { border-color: var(--news-red); box-shadow: 0 0 0 3px rgba(232,25,44,0.1); }
+  .admin-login-input.error { border-color: var(--red); box-shadow: 0 0 0 3px rgba(244,63,94,0.15); }
+  .admin-error-msg { font-size: 0.76rem; color: var(--red); margin-top: 8px; display: block; }
+  .admin-login-submit {
+    width: 100%; padding: 14px; margin-top: 8px;
+    background: linear-gradient(135deg, var(--news-red), #a80f1e);
+    border: none; border-radius: 12px; color: #fff;
+    font-family: 'DM Sans', sans-serif; font-size: 0.92rem; font-weight: 800;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    cursor: pointer; transition: opacity 0.2s, transform 0.15s;
+    box-shadow: 0 8px 24px rgba(232,25,44,0.3);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .admin-login-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+  .admin-login-close {
+    position: absolute; top: 16px; right: 16px;
+    background: none; border: none; color: var(--muted);
+    font-size: 1rem; cursor: pointer; padding: 4px; transition: color 0.2s;
+  }
+  .admin-login-close:hover { color: var(--text); }
 
-  /* ══════════════════════ FORM CARD ══════════════════════ */
+  /* ADMIN PANEL BANNER */
+  .admin-banner {
+    background: linear-gradient(135deg, rgba(232,25,44,0.08), rgba(26,111,196,0.06));
+    border: 1px solid rgba(232,25,44,0.2); border-radius: 16px;
+    padding: 16px 24px; margin-bottom: 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    flex-wrap: wrap;
+  }
+  .admin-banner-left { display: flex; align-items: center; gap: 12px; }
+  .admin-banner-dot { width: 8px; height: 8px; border-radius: 50%; background: #34d399; flex-shrink: 0; box-shadow: 0 0 8px rgba(52,211,153,0.5); }
+  .admin-banner-text strong { font-size: 0.88rem; font-weight: 700; color: var(--text); display: block; }
+  .admin-banner-text span { font-size: 0.72rem; color: var(--muted); }
+  .admin-logout-btn {
+    display: flex; align-items: center; gap: 7px;
+    padding: 8px 16px; border-radius: 9px;
+    background: rgba(244,63,94,0.08); border: 1px solid rgba(244,63,94,0.25);
+    color: var(--red); font-family: 'DM Sans', sans-serif;
+    font-size: 0.76rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .admin-logout-btn:hover { background: rgba(244,63,94,0.16); }
+
+  /* FORM CARD */
   .form-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 40px;
-    margin-bottom: 56px;
-    box-shadow: 0 32px 80px rgba(0,0,0,0.4);
-    position: relative; overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 24px; padding: 40px; margin-bottom: 56px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.4); position: relative; overflow: hidden;
   }
   .form-card::before {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
     background: linear-gradient(90deg, var(--news-red), var(--news-blue), var(--news-red));
   }
-  .form-header {
-    display: flex; align-items: center; gap: 16px;
-    margin-bottom: 32px;
-  }
+  .form-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
   .form-icon-wrap {
     width: 48px; height: 48px; border-radius: 14px;
     background: linear-gradient(135deg, var(--news-red) 0%, #a80f1e 100%);
@@ -2268,321 +2222,131 @@ const css = `
     font-size: 1.1rem; color: #fff; flex-shrink: 0;
     box-shadow: 0 8px 24px rgba(232,25,44,0.35);
   }
-  .form-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.55rem; font-weight: 700; color: var(--text);
-  }
-  .form-subtitle {
-    font-size: 0.75rem; color: var(--muted);
-    margin-top: 3px; letter-spacing: 0.07em; text-transform: uppercase;
-  }
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
+  .form-title { font-family: 'Playfair Display', serif; font-size: 1.55rem; font-weight: 700; color: var(--text); }
+  .form-subtitle { font-size: 0.75rem; color: var(--muted); margin-top: 3px; letter-spacing: 0.07em; text-transform: uppercase; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
-
   .field-wrap { position: relative; }
   .field-label {
-    display: block;
-    font-size: 0.68rem; font-weight: 700;
-    letter-spacing: 0.13em; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 8px;
+    display: block; font-size: 0.68rem; font-weight: 700;
+    letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
   }
   .field-input {
-    width: 100%;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 13px 18px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif; font-size: 0.93rem;
-    outline: none;
+    width: 100%; background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border); border-radius: 12px; padding: 13px 18px;
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.93rem; outline: none;
     transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
   }
   .field-input::placeholder { color: rgba(100,116,139,0.55); }
-  .field-input:focus {
-    border-color: var(--news-red);
-    background: rgba(232,25,44,0.04);
-    box-shadow: 0 0 0 3px rgba(232,25,44,0.1);
-  }
-  .form-actions {
-    grid-column: 1 / -1;
-    display: flex; gap: 12px;
-    margin-top: 8px;
-  }
+  .field-input:focus { border-color: var(--news-red); background: rgba(232,25,44,0.04); box-shadow: 0 0 0 3px rgba(232,25,44,0.1); }
+  .form-actions { grid-column: 1 / -1; display: flex; gap: 12px; margin-top: 8px; }
   .btn-submit {
     flex: 1; padding: 15px 24px;
     background: linear-gradient(135deg, var(--news-red) 0%, #a80f1e 100%);
-    border: none; border-radius: 12px;
-    color: #fff;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.92rem; font-weight: 800;
+    border: none; border-radius: 12px; color: #fff;
+    font-family: 'DM Sans', sans-serif; font-size: 0.92rem; font-weight: 800;
     letter-spacing: 0.06em; text-transform: uppercase;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
     transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
     box-shadow: 0 8px 24px rgba(232,25,44,0.3);
   }
-  .btn-submit:hover {
-    opacity: 0.91;
-    transform: translateY(-1px);
-    box-shadow: 0 14px 32px rgba(232,25,44,0.4);
-  }
-  .btn-submit:active { transform: translateY(0); }
+  .btn-submit:hover { opacity: 0.91; transform: translateY(-1px); }
   .btn-cancel {
-    padding: 15px 22px;
-    background: var(--glass);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    color: var(--muted);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.92rem; font-weight: 600;
-    cursor: pointer;
-    display: flex; align-items: center; gap: 8px;
-    transition: all 0.2s;
+    padding: 15px 22px; background: var(--glass); border: 1px solid var(--border);
+    border-radius: 12px; color: var(--muted);
+    font-family: 'DM Sans', sans-serif; font-size: 0.92rem; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;
   }
   .btn-cancel:hover { border-color: var(--border-hi); color: var(--text); }
 
-  /* ══════════════════════ SECTION HEADER ══════════════════════ */
-  .section-head {
-    display: flex; align-items: center;
-    justify-content: space-between;
-    margin-bottom: 28px;
-  }
+  /* MAIN */
+  .main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 44px 40px 80px; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
   .section-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.25rem; font-weight: 700; color: var(--text);
-    white-space: nowrap;
-    display: flex; align-items: center; gap: 10px;
+    font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; color: var(--text);
+    white-space: nowrap; display: flex; align-items: center; gap: 10px;
   }
   .section-title::before {
-    content: '';
-    display: inline-block;
-    width: 4px; height: 22px;
-    background: linear-gradient(180deg, var(--news-red), var(--news-blue));
-    border-radius: 4px;
+    content: ''; display: inline-block; width: 4px; height: 22px;
+    background: linear-gradient(180deg, var(--news-red), var(--news-blue)); border-radius: 4px;
   }
-  .section-line {
-    flex: 1; height: 1px;
-    background: var(--border);
-    margin: 0 16px;
-  }
-  .section-count {
-    font-size: 0.72rem; font-weight: 700;
-    color: var(--muted);
-    letter-spacing: 0.1em; text-transform: uppercase;
-    white-space: nowrap;
-  }
-
-  /* ══════════════════════ CARDS GRID ══════════════════════ */
-  .cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 24px;
-  }
-
-  /* ══════════════════════ MEMBER CARD ══════════════════════ */
+  .section-line { flex: 1; height: 1px; background: var(--border); margin: 0 16px; }
+  .section-count { font-size: 0.72rem; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
   .member-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 22px;
-    overflow: visible;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
-    transition: border-color 0.3s, box-shadow 0.3s;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 22px;
+    overflow: visible; box-shadow: 0 4px 24px rgba(0,0,0,0.3); transition: border-color 0.3s, box-shadow 0.3s;
   }
-  .member-card:hover {
-    border-color: rgba(232,25,44,0.3);
-    box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(232,25,44,0.1);
-  }
-
+  .member-card:hover { border-color: rgba(232,25,44,0.3); box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(232,25,44,0.1); }
   .card-banner {
-    height: 110px;
-    border-radius: 22px 22px 0 0;
-    position: relative;
-    background: linear-gradient(135deg, #1a0508 0%, #0d1524 60%, #050d1f 100%);
-    overflow: hidden;
+    height: 110px; border-radius: 22px 22px 0 0; position: relative;
+    background: linear-gradient(135deg, #1a0508 0%, #0d1524 60%, #050d1f 100%); overflow: hidden;
   }
-  .card-banner::after {
-    content: '';
-    position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(232,25,44,0.2) 0%, rgba(26,111,196,0.15) 100%);
-  }
+  .card-banner::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(232,25,44,0.2),rgba(26,111,196,0.15)); }
   .card-banner-pattern {
     position: absolute; inset: 0; opacity: 0.06;
-    background-image: repeating-linear-gradient(
-      45deg, #e8192c 0, #e8192c 1px, transparent 0, transparent 50%
-    );
+    background-image: repeating-linear-gradient(45deg,#e8192c 0,#e8192c 1px,transparent 0,transparent 50%);
     background-size: 22px 22px;
   }
-  /* small channel logo watermark on banner */
-  .card-banner-logo {
-    position: absolute; bottom: 8px; right: 12px;
-    opacity: 0.18; z-index: 1;
-    height: 28px; width: auto;
-    object-fit: contain;
-    filter: grayscale(1) brightness(2);
-  }
-
-  /* Avatar */
-  .card-avatar-wrap {
-    display: flex;
-    justify-content: center;
-    margin-top: -54px;
-    position: relative;
-    z-index: 10;
-  }
+  .card-banner-logo { position:absolute; bottom:8px; right:12px; opacity:0.18; z-index:1; height:28px; width:auto; object-fit:contain; filter:grayscale(1) brightness(2); }
+  .card-avatar-wrap { display:flex; justify-content:center; margin-top:-54px; position:relative; z-index:10; }
   .card-avatar {
-    width: 108px;
-    height: 108px;
-    border-radius: 50%;
-    object-fit: cover;
-    object-position: center top;
-    border: 4px solid var(--surface);
-    box-shadow: 0 0 0 2.5px var(--news-red), 0 8px 32px rgba(0,0,0,0.55);
-    display: block;
-    background: var(--surface);
+    width:108px; height:108px; border-radius:50%; object-fit:cover; object-position:center top;
+    border:4px solid var(--surface); box-shadow:0 0 0 2.5px var(--news-red),0 8px 32px rgba(0,0,0,0.55);
+    display:block; background:var(--surface);
   }
-
-  /* Card body */
-  .card-body {
-    padding: 14px 24px 28px;
-    text-align: center;
-  }
-  .card-name {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.3rem; font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.01em;
-    margin-top: 10px;
-  }
+  .card-body { padding:14px 24px 28px; text-align:center; }
+  .card-name { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; color:var(--text); letter-spacing:-0.01em; margin-top:10px; }
   .card-role {
-    display: inline-block;
-    margin-top: 8px;
-    font-size: 0.68rem; font-weight: 700;
-    letter-spacing: 0.12em; text-transform: uppercase;
-    color: #fff;
-    background: linear-gradient(135deg, var(--news-red), #a80f1e);
-    border-radius: 100px;
-    padding: 4px 14px;
-    box-shadow: 0 2px 10px rgba(232,25,44,0.3);
+    display:inline-block; margin-top:8px; font-size:0.68rem; font-weight:700;
+    letter-spacing:0.12em; text-transform:uppercase; color:#fff;
+    background:linear-gradient(135deg,var(--news-red),#a80f1e); border-radius:100px; padding:4px 14px;
   }
-  .card-city {
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    margin-top: 12px;
-    font-size: 0.83rem; color: var(--muted);
-  }
-  .card-city svg { color: var(--news-blue); font-size: 0.75rem; }
-  .card-divider {
-    height: 1px;
-    background: var(--border);
-    margin: 20px 0;
-  }
-  .card-actions { display: flex; gap: 10px; justify-content: center; }
+  .card-city { display:flex; align-items:center; justify-content:center; gap:6px; margin-top:12px; font-size:0.83rem; color:var(--muted); }
+  .card-city svg { color:var(--news-blue); font-size:0.75rem; }
+  .card-divider { height:1px; background:var(--border); margin:20px 0; }
+  .card-actions { display:flex; gap:10px; justify-content:center; }
   .btn-icon {
-    display: flex; align-items: center; gap: 7px;
-    padding: 10px 20px; border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.78rem; font-weight: 700;
-    letter-spacing: 0.05em; text-transform: uppercase;
-    border: 1px solid; cursor: pointer;
-    transition: all 0.2s;
+    display:flex; align-items:center; gap:7px; padding:10px 20px; border-radius:10px;
+    font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:700;
+    letter-spacing:0.05em; text-transform:uppercase; border:1px solid; cursor:pointer; transition:all 0.2s;
   }
-  .btn-edit {
-    background: rgba(251,191,36,0.08);
-    border-color: rgba(251,191,36,0.28);
-    color: var(--yellow);
-  }
-  .btn-edit:hover {
-    background: rgba(251,191,36,0.18);
-    border-color: rgba(251,191,36,0.55);
-    box-shadow: 0 4px 18px rgba(251,191,36,0.18);
-    transform: translateY(-1px);
-  }
-  .btn-delete {
-    background: rgba(244,63,94,0.08);
-    border-color: rgba(244,63,94,0.28);
-    color: var(--red);
-  }
-  .btn-delete:hover {
-    background: rgba(244,63,94,0.18);
-    border-color: rgba(244,63,94,0.55);
-    box-shadow: 0 4px 18px rgba(244,63,94,0.18);
-    transform: translateY(-1px);
-  }
-
-  /* ══════════════════════ EMPTY STATE ══════════════════════ */
-  .empty-state {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 80px 24px;
-  }
-  .empty-icon { font-size: 3rem; opacity: 0.12; margin-bottom: 20px; }
-  .empty-text {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.4rem; color: var(--muted);
-  }
-  .empty-sub {
-    font-size: 0.83rem;
-    color: rgba(100,116,139,0.55);
-    margin-top: 8px;
-  }
-
-  /* ══════════════════════ TOAST ══════════════════════ */
+  .btn-edit { background:rgba(251,191,36,0.08); border-color:rgba(251,191,36,0.28); color:var(--yellow); }
+  .btn-edit:hover { background:rgba(251,191,36,0.18); border-color:rgba(251,191,36,0.55); transform:translateY(-1px); }
+  .btn-delete { background:rgba(244,63,94,0.08); border-color:rgba(244,63,94,0.28); color:var(--red); }
+  .btn-delete:hover { background:rgba(244,63,94,0.18); border-color:rgba(244,63,94,0.55); transform:translateY(-1px); }
+  .empty-state { grid-column:1/-1; text-align:center; padding:80px 24px; }
+  .empty-icon { font-size:3rem; opacity:0.12; margin-bottom:20px; }
+  .empty-text { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--muted); }
+  .empty-sub { font-size:0.83rem; color:rgba(100,116,139,0.55); margin-top:8px; }
   .toast {
-    position: fixed; bottom: 32px; right: 32px; z-index: 200;
-    background: var(--surface);
-    border: 1px solid rgba(232,25,44,0.35);
-    border-radius: 14px;
-    padding: 15px 22px;
-    display: flex; align-items: center; gap: 12px;
-    box-shadow: 0 16px 40px rgba(0,0,0,0.55);
-    font-size: 0.88rem; font-weight: 500; color: var(--text);
+    position:fixed; bottom:32px; right:32px; z-index:300;
+    background:var(--surface); border:1px solid rgba(232,25,44,0.35); border-radius:14px;
+    padding:15px 22px; display:flex; align-items:center; gap:12px;
+    box-shadow:0 16px 40px rgba(0,0,0,0.55); font-size:0.88rem; font-weight:500; color:var(--text);
   }
-  .toast-icon { color: var(--news-red); font-size: 1rem; flex-shrink: 0; }
-
-  /* ══════════════════════ FOOTER ══════════════════════ */
+  .toast-icon { color:var(--news-red); font-size:1rem; flex-shrink:0; }
   .footer {
-    position: relative; z-index: 1;
-    border-top: 1px solid var(--border);
-    padding: 24px 40px;
-    display: flex; align-items: center;
-    justify-content: space-between; gap: 16px;
-    flex-wrap: wrap;
-    background: rgba(8,12,20,0.6);
+    position:relative; z-index:1; border-top:1px solid var(--border); padding:24px 40px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    background:rgba(8,12,20,0.6);
   }
-  .footer-copy {
-    font-size: 0.75rem; color: var(--muted);
-    letter-spacing: 0.04em;
-  }
-  .footer-copy span { color: var(--news-red); font-weight: 700; }
-  .footer-socials { display: flex; gap: 8px; }
-
-  /* ══════════════════════ RESPONSIVE ══════════════════════ */
-  @media (max-width: 768px) {
-    .header { padding: 12px 16px; }
-    .main   { padding: 24px 16px 60px; }
-    .form-card { padding: 24px 18px; }
-    .footer { padding: 20px 16px; }
-    .header-socials .social-divider { display: none; }
-  }
-  @media (max-width: 520px) {
-    .header-count { display: none; }
-  }
+  .footer-copy { font-size:0.75rem; color:var(--muted); letter-spacing:0.04em; }
+  .footer-copy span { color:var(--news-red); font-weight:700; }
+  .footer-socials { display:flex; gap:8px; }
+  @media(max-width:768px){ .header{padding:12px 16px;} .main{padding:24px 16px 60px;} .form-card{padding:24px 18px;} .footer{padding:20px 16px;} }
+  @media(max-width:520px){ .header-count{display:none;} }
 `;
 
-/* ─── Social links data ───────────────────────────────────── */
 const SOCIALS = [
-  { cls: "fb", icon: <FaFacebookF />, href: "https://www.facebook.com/profile.php?id=100089941361341", label: "Facebook" },
-  { cls: "ig", icon: <FaInstagram />, href: "https://www.instagram.com/jee_india_news?igsh=MWlnMXAzbWp6YjRj", label: "Instagram" },
-  { cls: "tw", icon: <FaTwitter />, href: "https://x.com/Jee_indianews", label: "Twitter" },
-  { cls: "yt", icon: <FaYoutube />, href: "https://youtube.com/@jeeindianews?si=y-DdUblyaBgJPXha", label: "YouTube" },
-  { cls: "wa", icon: <FaWhatsapp />, href: "https://chat.whatsapp.com/EmfVuYpXk749Y0NUKqVbSw", label: "WhatsApp" },
+  { cls:"fb", icon:<FaFacebookF />,  href:"https://www.facebook.com/profile.php?id=100089941361341" },
+  { cls:"ig", icon:<FaInstagram />,  href:"https://www.instagram.com/jee_india_news?igsh=MWlnMXAzbWp6YjRj" },
+  { cls:"tw", icon:<FaTwitter />,    href:"https://x.com/Jee_indianews" },
+  { cls:"yt", icon:<FaYoutube />,    href:"https://youtube.com/@jeeindianews?si=y-DdUblyaBgJPXha" },
+  { cls:"wa", icon:<FaWhatsapp />,   href:"https://chat.whatsapp.com/EmfVuYpXk749Y0NUKqVbSw" },
 ];
 
-const LOGO_URL = "/logo.png"; // Put logo.png in your public/ folder
-// OR use: const LOGO_URL = "https://i.imgur.com/YOUR_UPLOADED_LOGO.png";
+const LOGO_URL = "/logo.png";
 
 const TICKER_ITEMS = [
   "JEE इंडिया NEWS — आपका विश्वसनीय समाचार स्रोत",
@@ -2592,122 +2356,149 @@ const TICKER_ITEMS = [
   "सच दिखाना हमारा धर्म है",
 ];
 
-const token = localStorage.getItem("token");
+// ✅ YAHAN APNA PASSWORD BADAL SAKTA HAI
+const ADMIN_PASSWORD = "jee@admin123";
 
-const isAdmin = !!token;
-
-
-/* ─────────────────────────────────────────────────────────────
-   Toast
-───────────────────────────────────────────────────────────── */
 function Toast({ message }) {
   return (
-    <motion.div
-      className="toast"
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 12, scale: 0.95 }}
-      transition={{ duration: 0.25 }}
-    >
+    <motion.div className="toast"
+      initial={{opacity:0,y:20,scale:0.95}} animate={{opacity:1,y:0,scale:1}}
+      exit={{opacity:0,y:12,scale:0.95}} transition={{duration:0.25}}>
       <FaCheck className="toast-icon" />
       {message}
     </motion.div>
   );
 }
 
-/* ─────────────────────────────────────────────────────────────
-   News Ticker
-───────────────────────────────────────────────────────────── */
 function Ticker() {
-  const items = [...TICKER_ITEMS, ...TICKER_ITEMS]; // duplicate for seamless loop
+  const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
   return (
     <div className="ticker-wrap">
       <div className="ticker-label">BREAKING</div>
-      <div style={{ overflow: "hidden", flex: 1 }}>
+      <div style={{overflow:"hidden",flex:1}}>
         <div className="ticker-track">
-          {items.map((item, i) => (
-            <span key={i}>{item}</span>
-          ))}
+          {items.map((item, i) => <span key={i}>{item}</span>)}
         </div>
       </div>
     </div>
   );
 }
 
-/* ─────────────────────────────────────────────────────────────
-   Member Card
-───────────────────────────────────────────────────────────── */
-function MemberCard({ member, index, onEdit, onDelete }) {
+/* ── Admin Login Modal ── */
+function AdminLoginModal({ onSuccess, onClose }) {
+  const [password, setPassword] = useState("");
+  const [error, setError]       = useState(false);
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (password === ADMIN_PASSWORD) {
+      onSuccess();
+    } else {
+      setError(true);
+      setPassword("");
+      setTimeout(() => setError(false), 2500);
+    }
+  };
+
   return (
-      <motion.div 
-        className="member-card"
-        initial={{ opacity: 0, y: 28 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.94 }}
-        transition={{ delay: index * 0.07, duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-        whileHover={{ y: -6, transition: { duration: 0.2 } }}
-      >
-        {/* Banner */}
-        {isAdmin && (
-          <div className="card-banner">
-            <div className="card-banner-pattern" />
-            <img src={LOGO_URL} alt="" className="card-banner-logo"
-              onError={(e) => { e.target.style.display = "none"; }} />
-          </div>
-        )}
+    <motion.div className="admin-login-overlay"
+      initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+      <motion.div className="admin-login-box"
+        initial={{opacity:0,y:32,scale:0.96}}
+        animate={{opacity:1,y:0,scale:1}}
+        exit={{opacity:0,y:20,scale:0.96}}
+        transition={{duration:0.3,ease:[0.22,1,0.36,1]}}>
 
-        {/* Avatar */}
-        {isAdmin && (
-          <div className="card-avatar-wrap">
-            <img
-              className="card-avatar"
-              src={member.image}
-              alt={member.name}
-              onError={(e) => {
-                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                  member.name
-                )}&background=1a0508&color=e8192c&size=200&bold=true`;
-              }}
+        <button className="admin-login-close" onClick={onClose}>
+          <FaTimes />
+        </button>
+
+        <div className="admin-lock-icon"><FaLock /></div>
+        <h2>Admin Access</h2>
+        <p>Sirf authorized members hi team manage kar sakte hain</p>
+
+        <form onSubmit={handleLogin}>
+          <div className="admin-login-field">
+            <label className="admin-login-label">Admin Password</label>
+            <input
+              className={`admin-login-input${error ? " error" : ""}`}
+              type="password"
+              placeholder="Password dalein…"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              autoFocus
             />
+            {error && <span className="admin-error-msg">❌ Galat password. Dobara try karein.</span>}
           </div>
-        )}
-
-        {/* Info */}
-        {
-          isAdmin && (
-            <div className="card-body">
-              <h2 className="card-name">{member.name}</h2>
-              <span className="card-role">{member.designation}</span>
-              <div className="card-city">
-                <FaMapMarkerAlt />
-                <span>{member.city}</span>
-              </div>
-              <div className="card-divider" />
-              <div className="card-actions">
-                <button className="btn-icon btn-edit" onClick={() => onEdit(member)}>
-                  <FaEdit /> Edit
-                </button>
-                <button className="btn-icon btn-delete" onClick={() => onDelete(member._id)}>
-                  <FaTrash /> Remove
-                </button>
-              </div>
-            </div>
-          )}
+          <button type="submit" className="admin-login-submit">
+            <FaUnlock /> Login
+          </button>
+        </form>
       </motion.div>
-    );
+    </motion.div>
+  );
 }
 
-/* ─────────────────────────────────────────────────────────────
-   App
-───────────────────────────────────────────────────────────── */
+/* ── Member Card ── */
+function MemberCard({ member, index, onEdit, onDelete, isAdmin }) {
+  return (
+    <motion.div className="member-card"
+      initial={{opacity:0,y:28}} animate={{opacity:1,y:0}}
+      exit={{opacity:0,scale:0.94}}
+      transition={{delay:index*0.07,duration:0.38,ease:[0.22,1,0.36,1]}}
+      whileHover={{y:-6,transition:{duration:0.2}}}>
+
+      <div className="card-banner">
+        <div className="card-banner-pattern"/>
+        <img src={LOGO_URL} alt="" className="card-banner-logo"
+          onError={e => {e.target.style.display="none"}}/>
+      </div>
+
+      <div className="card-avatar-wrap">
+        <img className="card-avatar" src={member.image} alt={member.name}
+          onError={e => {
+            e.target.src=`https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=1a0508&color=e8192c&size=200&bold=true`;
+          }}/>
+      </div>
+
+      <div className="card-body">
+        <h2 className="card-name">{member.name}</h2>
+        <span className="card-role">{member.designation}</span>
+        <div className="card-city">
+          <FaMapMarkerAlt />
+          <span>{member.city}</span>
+        </div>
+
+        {/* Edit/Delete sirf admin ko dikhega */}
+        {isAdmin && (
+          <>
+            <div className="card-divider"/>
+            <div className="card-actions">
+              <button className="btn-icon btn-edit" onClick={() => onEdit(member)}>
+                <FaEdit /> Edit
+              </button>
+              <button className="btn-icon btn-delete" onClick={() => onDelete(member._id)}>
+                <FaTrash /> Remove
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ── Main App ── */
 export default function App() {
-  const [members, setMembers] = useState([]);
-  const [search, setSearch] = useState("");
-  const [editId, setEditId] = useState(null);
-  const [toast, setToast] = useState(null);
-  const [formData, setFormData] = useState({
-    name: "", designation: "", city: "", image: "",
-  });
+  const [members,   setMembers]   = useState([]);
+  const [search,    setSearch]    = useState("");
+  const [editId,    setEditId]    = useState(null);
+  const [toast,     setToast]     = useState(null);
+  const [formData,  setFormData]  = useState({ name:"", designation:"", city:"", image:"" });
+
+  // Admin state
+  const [isAdmin,        setIsAdmin]        = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => { fetchMembers(); }, []);
 
@@ -2724,309 +2515,228 @@ export default function App() {
   };
 
   const handleChange = (e) =>
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormData(prev => ({...prev, [e.target.name]: e.target.value}));
 
   const handleSubmit = async (e) => {
-
     e.preventDefault();
-
     try {
-
       if (editId) {
-
-        await axios.put(
-
-          `https://news-portal-backend-d8q9.onrender.com/api/team/${editId}`,
-
-          formData,
-
-          {
-            headers: {
-              Authorization: token
-            }
-          }
-        );
-
+        await axios.put(`https://news-portal-backend-d8q9.onrender.com/api/team/${editId}`, formData);
         showToast("Member updated successfully");
-
         setEditId(null);
-
       } else {
-
-        await axios.post(
-
-          "https://news-portal-backend-d8q9.onrender.com/api/team",
-
-          formData,
-
-          {
-            headers: {
-              Authorization: token
-            }
-          }
-        );
-
+        await axios.post("https://news-portal-backend-d8q9.onrender.com/api/team", formData);
         showToast("Member added successfully");
       }
-
-      setFormData({
-
-        name: "",
-        designation: "",
-        city: "",
-        image: "",
-      });
-
+      setFormData({name:"",designation:"",city:"",image:""});
       fetchMembers();
-
-    } catch (err) {
-
-      console.error(err);
-
-      showToast("Unauthorized Access");
-    }
+    } catch (err) { console.error(err); }
   };
 
-
   const handleDelete = async (id) => {
-
     try {
-
-      await axios.delete(
-
-        `https://news-portal-backend-d8q9.onrender.com/api/team/${id}`,
-
-        {
-          headers: {
-            Authorization: token
-          }
-        }
-      );
-
+      await axios.delete(`https://news-portal-backend-d8q9.onrender.com/api/team/${id}`);
       fetchMembers();
-
       showToast("Member removed");
-
-    } catch (err) {
-
-      console.error(err);
-
-      showToast("Unauthorized Access");
-    }
+    } catch (err) { console.error(err); }
   };
 
   const handleEdit = (member) => {
     setEditId(member._id);
-    setFormData({
-      name: member.name, designation: member.designation,
-      city: member.city, image: member.image,
-    });
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setFormData({ name:member.name, designation:member.designation, city:member.city, image:member.image });
+    window.scrollTo({top:0, behavior:"smooth"});
   };
 
   const handleCancel = () => {
     setEditId(null);
-    setFormData({ name: "", designation: "", city: "", image: "" });
+    setFormData({name:"",designation:"",city:"",image:""});
   };
 
-  const filtered = members.filter((m) =>
+  const handleLogout = () => {
+    setIsAdmin(false);
+    setEditId(null);
+    setFormData({name:"",designation:"",city:"",image:""});
+    showToast("Admin se logout ho gaye");
+  };
+
+  const filtered = members.filter(m =>
     m.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <>
       <style>{css}</style>
-
       <div className="root-bg">
 
-        {/* ════ HEADER ════ */}
+        {/* HEADER */}
         <header className="header">
-
-          {/* Logo + Brand Name */}
           <div className="header-brand">
-            <img
-              src={LOGO_URL}
-              alt="JEE India News Logo"
-              className="header-logo"
-              onError={(e) => { e.target.style.display = "none"; }}
-            />
+            <img src={LOGO_URL} alt="JEE India News Logo" className="header-logo"
+              onError={e => {e.target.style.display="none"}}/>
             <div className="header-brand-text">
-              <h1>
-                <span className="red">JEE</span>{" "}
-                <span className="blue">इंडिया</span>{" "}
-                NEWS
-              </h1>
+              <h1><span className="red">JEE</span> <span className="blue">इंडिया</span> NEWS</h1>
               <small>Management Dashboard</small>
             </div>
           </div>
 
-          {/* Social Links */}
           <div className="header-socials">
-            {SOCIALS.map((s) => (
-              <a
-                key={s.cls}
-                href={s.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`social-btn ${s.cls}`}
-                aria-label={s.label}
-                title={s.label}
-              >
-                {s.icon}
-              </a>
+            {SOCIALS.map(s => (
+              <a key={s.cls} href={s.href} target="_blank" rel="noopener noreferrer"
+                className={`social-btn ${s.cls}`}>{s.icon}</a>
             ))}
-            <div className="social-divider" />
+            <div className="social-divider"/>
             <div className="header-count">
-              {members.length} {members.length === 1 ? "Member" : "Members"}
+              {members.length} {members.length===1?"Member":"Members"}
             </div>
           </div>
 
-          {/* Search */}
           <div className="search-wrap">
-            <FaSearch className="search-icon" />
-            <input
-              className="search-input"
-              type="text"
-              placeholder="Search by name…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+            <FaSearch className="search-icon"/>
+            <input className="search-input" type="text"
+              placeholder="Search by name…" value={search}
+              onChange={e => setSearch(e.target.value)}/>
           </div>
+
+          {/* ADMIN BUTTON */}
+          {isAdmin ? (
+            <button className="admin-btn active" onClick={handleLogout}>
+              <FaSignOutAlt /> Logout
+            </button>
+          ) : (
+            <button className="admin-btn locked" onClick={() => setShowLoginModal(true)}>
+              <FaLock /> Admin
+            </button>
+          )}
         </header>
 
-        {/* ════ NEWS TICKER ════ */}
         <Ticker />
 
-        {/* ════ MAIN ════ */}
         <main className="main">
 
-          {/* ── Form ── */}
-          {isAdmin && (<motion.div
-            className="form-card"
-            initial={{ opacity: 0, y: 32 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div className="form-header">
-              <div className="form-icon-wrap">
-                {editId ? <FaEdit /> : <FaPlus />}
-              </div>
-              <div>
-                <div className="form-title">
-                  {editId ? "Update Member" : "Add New Member"}
-                </div>
-                <div className="form-subtitle">
-                  {editId ? "Editing existing record" : "Fill in the details below"}
-                </div>
-              </div>
-            </div>
+          {/* ADMIN PANEL — sirf admin ko dikhega */}
+          <AnimatePresence>
+            {isAdmin && (
+              <motion.div
+                initial={{opacity:0,height:0,marginBottom:0}}
+                animate={{opacity:1,height:"auto",marginBottom:0}}
+                exit={{opacity:0,height:0,marginBottom:0}}
+                transition={{duration:0.4,ease:[0.22,1,0.36,1]}}>
 
-            <form onSubmit={handleSubmit}>
-              <div className="form-grid">
-                {[
-                  { name: "name", label: "Full Name", placeholder: "e.g. Aryan Sharma" },
-                  { name: "designation", label: "Designation", placeholder: "e.g. Senior Reporter" },
-                  { name: "city", label: "City", placeholder: "e.g. Mumbai" },
-                  { name: "image", label: "Profile Image URL", placeholder: "https://…" },
-                ].map((field) => (
-                  <div className="field-wrap" key={field.name}>
-                    <label className="field-label">{field.label}</label>
-                    <input
-                      className="field-input"
-                      type="text"
-                      name={field.name}
-                      placeholder={field.placeholder}
-                      value={formData[field.name]}
-                      onChange={handleChange}
-                      required
-                    />
+                {/* Admin Active Banner */}
+                <div className="admin-banner">
+                  <div className="admin-banner-left">
+                    <div className="admin-banner-dot"/>
+                    <div className="admin-banner-text">
+                      <strong>Admin Mode Active</strong>
+                      <span>Aap team members add, edit, aur delete kar sakte hain</span>
+                    </div>
                   </div>
-                ))}
-
-                <div className="form-actions">
-                  <button type="submit" className="btn-submit">
-                    <FaCheck />
-                    {editId ? "Save Changes" : "Add Member"}
+                  <button className="admin-logout-btn" onClick={handleLogout}>
+                    <FaSignOutAlt /> Logout
                   </button>
-                  {editId && (
-                    <button type="button" className="btn-cancel" onClick={handleCancel}>
-                      <FaTimes /> Cancel
-                    </button>
-                  )}
                 </div>
-              </div>
-            </form>
-          </motion.div>)
-          }
 
-          {/* ── Team Grid ── */}
+                {/* Add/Edit Form */}
+                <motion.div className="form-card"
+                  initial={{opacity:0,y:24}} animate={{opacity:1,y:0}}
+                  transition={{delay:0.1,duration:0.4,ease:[0.22,1,0.36,1]}}>
+
+                  <div className="form-header">
+                    <div className="form-icon-wrap">{editId ? <FaEdit/> : <FaPlus/>}</div>
+                    <div>
+                      <div className="form-title">{editId ? "Update Member" : "Add New Member"}</div>
+                      <div className="form-subtitle">{editId ? "Editing existing record" : "Fill in the details below"}</div>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleSubmit}>
+                    <div className="form-grid">
+                      {[
+                        {name:"name",        label:"Full Name",         placeholder:"e.g. Aryan Sharma"},
+                        {name:"designation", label:"Designation",       placeholder:"e.g. Senior Reporter"},
+                        {name:"city",        label:"City",              placeholder:"e.g. Mumbai"},
+                        {name:"image",       label:"Profile Image URL", placeholder:"https://…"},
+                      ].map(field => (
+                        <div className="field-wrap" key={field.name}>
+                          <label className="field-label">{field.label}</label>
+                          <input className="field-input" type="text" name={field.name}
+                            placeholder={field.placeholder} value={formData[field.name]}
+                            onChange={handleChange} required/>
+                        </div>
+                      ))}
+                      <div className="form-actions">
+                        <button type="submit" className="btn-submit">
+                          <FaCheck/> {editId ? "Save Changes" : "Add Member"}
+                        </button>
+                        {editId && (
+                          <button type="button" className="btn-cancel" onClick={handleCancel}>
+                            <FaTimes/> Cancel
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </form>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* TEAM GRID — sab ko dikhta hai */}
           <div className="section-head">
             <span className="section-title">Our Team</span>
-            <div className="section-line" />
+            <div className="section-line"/>
             <span className="section-count">{filtered.length} shown</span>
           </div>
 
           <div className="cards-grid">
             <AnimatePresence mode="popLayout">
               {filtered.length === 0 ? (
-                <motion.div
-                  className="empty-state"
-                  key="empty"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
+                <motion.div className="empty-state" key="empty"
+                  initial={{opacity:0}} animate={{opacity:1}}>
                   <div className="empty-icon">◈</div>
                   <div className="empty-text">
                     {search ? "No members match your search" : "No team members yet"}
                   </div>
                   <div className="empty-sub">
-                    {search
-                      ? "Try a different name"
-                      : "Add your first member using the form above"}
+                    {search ? "Try a different name" : isAdmin ? "Add your first member using the form above" : "Admin se contact karein"}
                   </div>
                 </motion.div>
               ) : (
                 filtered.map((member, i) => (
-                  <MemberCard
-                    key={member._id}
-                    member={member}
-                    index={i}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                  />
+                  <MemberCard key={member._id} member={member} index={i}
+                    onEdit={handleEdit} onDelete={handleDelete} isAdmin={isAdmin}/>
                 ))
               )}
             </AnimatePresence>
           </div>
         </main>
 
-        {/* ════ FOOTER ════ */}
         <footer className="footer">
           <p className="footer-copy">
             © {new Date().getFullYear()} <span>JEE इंडिया NEWS</span> — All rights reserved
           </p>
           <div className="footer-socials">
-            {SOCIALS.map((s) => (
-              <a
-                key={s.cls}
-                href={s.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`social-btn ${s.cls}`}
-                aria-label={s.label}
-                title={s.label}
-              >
-                {s.icon}
-              </a>
+            {SOCIALS.map(s => (
+              <a key={s.cls} href={s.href} target="_blank" rel="noopener noreferrer"
+                className={`social-btn ${s.cls}`}>{s.icon}</a>
             ))}
           </div>
         </footer>
 
-        {/* ── Toast ── */}
         <AnimatePresence>
-          {toast && <Toast key="toast" message={toast} />}
+          {toast && <Toast key="toast" message={toast}/>}
         </AnimatePresence>
       </div>
+
+      {/* ADMIN LOGIN MODAL */}
+      <AnimatePresence>
+        {showLoginModal && (
+          <AdminLoginModal
+            onSuccess={() => { setIsAdmin(true); setShowLoginModal(false); showToast("Admin panel unlock ho gaya ✓"); }}
+            onClose={() => setShowLoginModal(false)}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }
