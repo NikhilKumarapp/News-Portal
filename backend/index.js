@@ -71,7 +71,6 @@ const dotenv = require("dotenv");
 const dns = require("dns");
 const multer = require("multer");
 const { v2: cloudinary } = require("cloudinary");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 dotenv.config();
@@ -88,57 +87,97 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// ✅ Config verify karo (server start pe)
 console.log("Cloudinary Config:", {
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME ? "✓ Set" : "✗ MISSING",
   api_key: process.env.CLOUDINARY_API_KEY ? "✓ Set" : "✗ MISSING",
   api_secret: process.env.CLOUDINARY_API_SECRET ? "✓ Set" : "✗ MISSING",
 });
 
-// ── Multer + Cloudinary Storage ──
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "team-portal",
-    allowed_formats: ["jpeg", "jpg", "png", "webp", "gif"],
-    public_id: (req, file) =>
-      `${Date.now()}-${Math.round(Math.random() * 1e9)}`,
+// ── Multer Memory Storage ──
+const storage = multer.memoryStorage();
+
+// ── File Filter ──
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+  ];
+
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Sirf image files allowed hain (jpeg, jpg, png, webp, gif)"));
+  }
+};
+
+// ── Multer Upload Config ──
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB
   },
 });
 
-const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
-});
-
 // ── Image Upload Route ──
-// ✅ Error handling ko inline callback me daal do
-app.post("/api/upload", (req, res) => {
-  upload.single("image")(req, res, (err) => {
-    if (err) {
-      console.error("Upload Error:", err);
-      return res.status(400).json({ error: err.message });
-    }
+app.post("/api/upload", upload.single("image"), async (req, res, next) => {
+  try {
     if (!req.file) {
       return res.status(400).json({ error: "Koi file nahi mili" });
     }
-    console.log("Uploaded File:", req.file);
-    res.json({ url: req.file.path });
-  });
+
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: "team-portal",
+          resource_type: "image",
+          public_id: `${Date.now()}-${Math.round(Math.random() * 1e9)}`,
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      );
+
+      stream.end(req.file.buffer);
+    });
+
+    return res.status(200).json({
+      message: "Image upload successful",
+      url: result.secure_url,
+      public_id: result.public_id,
+      original_name: req.file.originalname,
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
+// MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log(err));
+  .catch((err) => console.log("Mongo Error:", err));
 
+// Other routes
 app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/team", require("./routes/teamRoutes"));
 
-// ✅ Global error handler SABSE LAST me
+// ── Global Error Handler ──
 app.use((err, req, res, next) => {
   console.error("Global Error:", err);
-  res.status(400).json({ error: err.message });
+
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({ error: "File size 5MB se zyada nahi honi chahiye" });
+    }
+    return res.status(400).json({ error: err.message });
+  }
+
+  return res.status(400).json({ error: err.message || "Something went wrong" });
 });
 
 const PORT = process.env.PORT || 5000;
