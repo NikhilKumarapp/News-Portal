@@ -216,13 +216,13 @@ console.log("API Secret :", process.env.CLOUDINARY_API_SECRET ? "Loaded" : "Miss
 
 // Test Cloudinary Connection
 cloudinary.api.ping()
-.then((res) => {
-    console.log("✅ Cloudinary Connected");
-})
-.catch((err) => {
-    console.log("❌ Cloudinary Error");
-    console.log(err);
-});
+    .then((res) => {
+        console.log("✅ Cloudinary Connected");
+    })
+    .catch((err) => {
+        console.log("❌ Cloudinary Error");
+        console.log(err);
+    });
 
 // ---------------- Multer ----------------
 
@@ -253,20 +253,65 @@ const upload = multer({
 
 // ---------------- Upload Function ----------------
 
+// const uploadToCloudinary = (buffer) => {
+
+//     return new Promise((resolve, reject) => {
+
+//         const uploadStream = cloudinary.uploader.upload_stream(
+//             {
+//                 folder: "team-portal",
+//                 resource_type: "image",
+//                 transformation: [
+//                     {
+//                         width: 1200,
+//                         height: 1200,
+//                         crop: "limit",
+//                         quality: "auto",
+//                         fetch_format: "auto",
+//                     },
+//                 ],
+//             },
+//             (error, result) => {
+
+//                 if (error) {
+//                     console.log("Cloudinary Upload Error");
+//                     console.log(error);
+//                     return reject(error);
+//                 }
+
+//                 resolve(result);
+//             }
+//         );
+
+//         streamifier.createReadStream(buffer).pipe(uploadStream);
+//     });
+// };
+
 const uploadToCloudinary = (buffer) => {
-
     return new Promise((resolve, reject) => {
-
         const uploadStream = cloudinary.uploader.upload_stream(
             {
-                folder: "team-portal",
+                folder: "NewsMedia", // Cloudinary folder name
                 resource_type: "image",
+
+                transformation: [
+                    {
+                        width: 1200,
+                        height: 1200,
+                        crop: "limit",
+                        quality: "auto",
+                    },
+                ],
             },
             (error, result) => {
-
                 if (error) {
-                    console.log("Cloudinary Upload Error");
-                    console.log(error);
+                    console.error("Cloudinary upload error:", {
+                        message: error.message,
+                        httpCode: error.http_code,
+                        name: error.name,
+                        details: error.error,
+                    });
+
                     return reject(error);
                 }
 
@@ -274,7 +319,7 @@ const uploadToCloudinary = (buffer) => {
             }
         );
 
-        streamifier.createReadStream(buffer).pipe(uploadStream);
+        uploadStream.end(buffer);
     });
 };
 
@@ -337,17 +382,17 @@ app.post("/api/upload", upload.single("image"), async (req, res) => {
 // ---------------- MongoDB ----------------
 
 mongoose.connect(process.env.MONGO_URI)
-.then(() => {
+    .then(() => {
 
-    console.log("MongoDB Connected");
+        console.log("MongoDB Connected");
 
-})
-.catch((err) => {
+    })
+    .catch((err) => {
 
-    console.log("MongoDB Error");
-    console.log(err);
+        console.log("MongoDB Error");
+        console.log(err);
 
-});
+    });
 
 // ---------------- Routes ----------------
 

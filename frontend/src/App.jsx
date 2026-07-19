@@ -9,6 +9,8 @@ import {
 } from "react-icons/fa";
 
 const BASE_URL = "https://news-portal-backend-d8q9.onrender.com";
+// const BASE_URL = "http://localhost:5000";
+
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
