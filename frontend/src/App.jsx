@@ -8,8 +8,8 @@ import {
   FaCamera, FaImage,
 } from "react-icons/fa";
 
-const BASE_URL = "https://news-portal-backend-d8q9.onrender.com";
-// const BASE_URL = "http://localhost:5000";
+// const BASE_URL = "https://news-portal-backend-d8q9.onrender.com";
+const BASE_URL = "http://localhost:5000";
 
 
 const css = `
@@ -431,7 +431,8 @@ export default function App() {
       const res = await axios.post(`${BASE_URL}/api/upload`, fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setImageUrl(res.data.url);   // server URL store karo
+      // setImageUrl(res.data.url);   // server URL store karo
+      setImageUrl(res.data.image?.url || res.data.url);
       setUploadDone(true);
     } catch(err) {
       console.error(err);
